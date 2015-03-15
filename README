@@ -1,0 +1,36 @@
+This program is a proof of concept for using the Twisted event-driven networking framework to manage a server herd receiving queries from multiple users to each server, maintaining a consistent internal database across servers, and an irregular communication graph between servers (here addressed with a flooding algorithm).
+
+This code depends on the Twisted event-driven networking framework version 15.0.0 and is written for Python 2.7.9. Various methods of downloading Twisted can be found at http://twistedmatrix.com/trac/wiki/Downloads
+
+This example explores a use case of five servers reached via a common intermediate host. You'll need to provide your own host and Google Places API Key (obtained by following the steps at https://developers.google.com/places/documentation/index#Authentication)
+
+To run it on your own systems you'll either need to ensure that each of the SERVER_PORTS is an open port on your own system.
+
+Once you've made those changes to the code and installed Twisted, you can run the servers with:
+twistd -n -y proj.py
+
+From there interaction takes place via external connections. Open a TelNet or SSH connection to a port with a server running on it and interact with the server network.
+
+Update a client's location with:
+
+IAMAT {Client} {Latitude & Longitude in ISO 6709 Notation} {Current POSIX Time}
+
+e.g.
+IAMAT id.website.com +34.068930-118.445127 1400794645.392014450
+
+This will propagate the updated data throughout the server network and output a message like:
+
+AT Alford +0.563873386 id.website.com +34.068930-118.445127 1400794699.108893381
+
+Where the second output is the name of the server that received the update and the third is the difference between the Client's send time and the time the server received the message.
+
+Finally, a client can query the database about the last known whereabouts of any user with an input of the form:
+
+WHATSAT {Name of Client} {Search Radius in km} {Max Number of Results Desired}
+
+e.g.
+WHATSAT kiwi.cs.ucla.edu 10 5
+
+The radius maximum is 50 km and the maximum number of results is 20 because of the limitations of the Google Places API.
+
+An unrecognized or invalid command will be echoed back prepended with a "? ".
